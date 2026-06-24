@@ -4,7 +4,7 @@ pipeline {
 	stages {
 		stage("Checkout") {
 			steps {
-				git branch: 'master', url: 'https://github.com/gutamurr/ci-cd-webapp.git'
+				git branch: 'jack', url: 'https://github.com/gutamurr/ci-cd-webapp.git'
 			}
 		}
 
