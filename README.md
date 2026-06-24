@@ -18,6 +18,8 @@ Open:
 Get the initial admin password:  
 `docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword`
 
+### Install Docker tool 
+
 ************************************************
 
 ### Troubleshooting
@@ -28,7 +30,7 @@ If Jenkins cannot execute Docker commands (e.g. `permission denied` when accessi
 A common fix is to run Jenkins with the correct group ID (typically `1001`):
 
 ```bash
-docker run -d -p 8080:8080 \
+docker run -d -p 8000:8080 \
   -v jenkins_home:/var/jenkins_home \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --group-add 1001 \
@@ -43,7 +45,7 @@ this is caused by a mismatch between the Docker client inside the Jenkins contai
 
 **Fix it by explicitly setting a compatible Docker API version in the environment:**
 ```bash
-docker run -d -p 8080:8080 \
+docker run -d -p 8000:8080 \
   -v jenkins_home:/var/jenkins_home \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e DOCKER_API_VERSION=1.43 \
