@@ -24,7 +24,7 @@ pipeline {
 				script {
 					sh '''
 						echo "Health response:"
-						curl -f http://localhost:5000/health
+						curl -f http://localhost:8080/health
 					'''
 				}
 			}
