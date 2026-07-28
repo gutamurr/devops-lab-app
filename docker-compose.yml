@@ -4,4 +4,4 @@ services:
     build: .
     container_name: webapp-container
     ports:
-      - "8080:5000"
+      - "5000:5000"
