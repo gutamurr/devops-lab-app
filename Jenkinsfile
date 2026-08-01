@@ -42,10 +42,10 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
-                        kubectl set image deployment/app \
-                          flask-app=${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
-                          -n devops-lab
-                        kubectl rollout status deployment/app -n devops-lab
+                        envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
+                        kubectl apply -f k8s/service.yaml
+                        kubectl apply -f k8s/ingress.yaml
+                        kubectl rollout status deployment/flask-app -n myapp
                     """
                 }
             }
