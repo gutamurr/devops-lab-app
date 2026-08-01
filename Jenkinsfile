@@ -1,34 +1,54 @@
 pipeline {
-	agent any
+    agent any
 
-	stages {
-		stage("Checkout") {
-			steps {
-				git branch: 'master', url: 'https://github.com/gutamurr/ci-cd-webapp.git'
-			}
-		}
+    triggers {
+        githubPush()
+    }
 
-		stage("Build & Run") {
-			steps {
-				script {
-					sh '''
-						docker compose down --remove-orphans || true
-						docker compose up -d --build --force-recreate
-					'''
-					}
-				}
-			}
+    environment {
+        REGISTRY   = "ghcr.io"
+        IMAGE_NAME = "gutamurr/devops-lab-app"
+        IMAGE_TAG  = "${env.GIT_COMMIT[0..7]}"
+    }
 
-		stage("Test") {
-			steps {
-				script {
-					sh '''
-						echo "Health response:"
-						curl -f http://localhost:5000/health
-					'''
-				}
-			}
-		}
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-	}
+        stage('Build') {
+            steps {
+                sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} -t ${REGISTRY}/${IMAGE_NAME}:latest ."
+            }
+        }
+
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'ghcr-creds',
+                    usernameVariable: 'GHCR_USER',
+                    passwordVariable: 'GHCR_TOKEN'
+                )]) {
+                    sh "echo $GHCR_TOKEN | docker login ${REGISTRY} -u $GHCR_USER --password-stdin"
+                    sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                withCredentials([file(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh """
+                        kubectl set image deployment/app \
+                          flask-app=${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                          -n devops-lab
+                        kubectl rollout status deployment/app -n devops-lab
+                    """
+                }
+            }
+        }
+    }
 }
