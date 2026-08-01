@@ -4,4 +4,8 @@ services:
     build: .
     container_name: webapp-container
     ports:
+<<<<<<< HEAD
       - "5000:5000"
+=======
+      - "8000:8000"
+>>>>>>> 08617d8 (Change web app port)
