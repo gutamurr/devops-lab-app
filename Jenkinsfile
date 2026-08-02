@@ -8,13 +8,20 @@ pipeline {
     environment {
         REGISTRY   = "ghcr.io"
         IMAGE_NAME = "gutamurr/devops-lab-app"
-        IMAGE_TAG  = "${env.GIT_COMMIT[0..7]}"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        stage('Prepare') {
+            steps {
+                script {
+                    env.IMAGE_TAG = env.GIT_COMMIT.take(7)
+                    env.FULL_IMAGE = "${env.REGISTRY}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                }
             }
         }
 
@@ -44,7 +51,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withKubeConfig([credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG']) {
+                withKubeConfig([credentialsId: 'k3s-kubeconfig']) {
                     sh """
                         envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
                         kubectl apply -f k8s/service.yaml
