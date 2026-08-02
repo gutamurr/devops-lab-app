@@ -13,8 +13,6 @@ spec:
       labels:
         app: app
     spec:
-      imagePullSecrets:
-      - name: ${IMAGE_PULL_SECRET}
       containers:
       - name: webapp-container
         image: ${FULL_IMAGE}

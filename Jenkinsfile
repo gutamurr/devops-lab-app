@@ -53,7 +53,7 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
-                        envsubst '\${FULL_IMAGE} \${IMAGE_PULL_SECRET}' < k8s/deployment.yaml.template | kubectl apply -f -
+                        envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
                         kubectl rollout status deployment/app -n devops-lab
                     """
                 }
