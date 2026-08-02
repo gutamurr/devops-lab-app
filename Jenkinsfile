@@ -26,14 +26,18 @@ pipeline {
 
         stage('Push') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'ghcr-creds',
-                    usernameVariable: 'GHCR_USER',
-                    passwordVariable: 'GHCR_TOKEN'
-                )]) {
-                    sh "echo $GHCR_TOKEN | docker login ${REGISTRY} -u $GHCR_USER --password-stdin"
-                    sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'ghcr-creds',
+                        usernameVariable: 'GHCR_USER',
+                        passwordVariable: 'GHCR_TOKEN'
+                    )
+                ]) {
+                    sh """
+                        echo "\$GHCR_TOKEN" | docker login ${REGISTRY} -u "\$GHCR_USER" --password-stdin
+                        docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY}/${IMAGE_NAME}:latest
+                    """
                 }
             }
         }
