@@ -13,8 +13,10 @@ spec:
       labels:
         app: app
     spec:
+      imagePullSecrets:
+        - name: ghcr-auth
       containers:
-      - name: webapp-container
-        image: ${FULL_IMAGE}
-        ports:
-        - containerPort: 8000
+        - name: webapp-container
+          image: ${FULL_IMAGE}
+          ports:
+            - containerPort: 8000

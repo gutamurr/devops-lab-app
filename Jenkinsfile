@@ -6,8 +6,9 @@ pipeline {
     }
 
     environment {
-        REGISTRY   = "ghcr.io"
-        IMAGE_NAME = "gutamurr/devops-lab-app"
+        REGISTRY    = "ghcr.io"
+        IMAGE_NAME  = "gutamurr/devops-lab-app"
+        GHCR_EMAIL  = "gutamurr@gmail.com"
     }
 
     stages {
@@ -51,8 +52,22 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withCredentials([file(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG')]) {
+                withCredentials([
+                    file(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG'),
+                    usernamePassword(
+                        credentialsId: 'ghcr-creds',
+                        usernameVariable: 'GHCR_USER',
+                        passwordVariable: 'GHCR_TOKEN'
+                    )
+                ]) {
                     sh """
+                        kubectl create secret docker-registry ghcr-auth \
+                            --namespace devops-lab \
+                            --docker-server=${REGISTRY} \
+                            --docker-username="\$GHCR_USER" \
+                            --docker-password="\$GHCR_TOKEN" \
+                            --docker-email="${GHCR_EMAIL}" \
+                            --dry-run=client -o yaml | kubectl apply -f -
                         envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
                         kubectl rollout status deployment/app -n devops-lab
                     """
