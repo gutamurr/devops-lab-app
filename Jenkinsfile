@@ -51,7 +51,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withKubeConfig([credentialsId: 'k3s-kubeconfig']) {
+                withCredentials([file(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG')]) {
                     sh """
                         envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
                         kubectl apply -f k8s/service.yaml
