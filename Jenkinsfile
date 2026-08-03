@@ -61,14 +61,6 @@ pipeline {
                     )
                 ]) {
                     sh """
-                        export NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[0].address}')
-                        echo "NODE_IP resolved to: '\$NODE_IP'"
-
-                        if [ -z "\$NODE_IP" ]; then
-                            echo "ERROR: NODE_IP empty — kubectl could not resolve node IP address. Check your KUBECONFIG and cluster status."
-                            exit 1
-                        fi
-
                         kubectl create secret docker-registry ghcr-auth \
                             --namespace devops-lab \
                             --docker-server=${REGISTRY} \
@@ -79,7 +71,6 @@ pipeline {
 
                         envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
                         kubectl apply -f k8s/service.yaml
-                        envsubst '\${NODE_IP}' < k8s/ingress.yaml.template | kubectl apply -f -
 
                         kubectl rollout status deployment/app -n devops-lab
                     """
