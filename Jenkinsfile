@@ -69,6 +69,8 @@ pipeline {
                             --docker-email="${GHCR_EMAIL}" \
                             --dry-run=client -o yaml | kubectl apply -f -
                         envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
+                        kubectl apply -f k8s/service.yaml
+                        kubectl apply -f k8s/ingress.yaml
                         kubectl rollout status deployment/app -n devops-lab
                     """
                 }
