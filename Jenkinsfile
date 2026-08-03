@@ -72,6 +72,9 @@ pipeline {
                         envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
                         kubectl apply -f k8s/service.yaml
 
+                        export NODE_IP="${VAGRANT_BASE_IP}.11"
+                        envsubst '\${NODE_IP}' < k8s/ingress.yaml.template | kubectl apply -f -
+
                         kubectl rollout status deployment/app -n devops-lab
                     """
                 }
