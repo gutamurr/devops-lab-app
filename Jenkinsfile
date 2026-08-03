@@ -61,6 +61,8 @@ pipeline {
                     )
                 ]) {
                     sh """
+                        export NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+
                         kubectl create secret docker-registry ghcr-auth \
                             --namespace devops-lab \
                             --docker-server=${REGISTRY} \
@@ -68,9 +70,11 @@ pipeline {
                             --docker-password="\$GHCR_TOKEN" \
                             --docker-email="${GHCR_EMAIL}" \
                             --dry-run=client -o yaml | kubectl apply -f -
+
                         envsubst '\${FULL_IMAGE}' < k8s/deployment.yaml.template | kubectl apply -f -
                         kubectl apply -f k8s/service.yaml
-                        kubectl apply -f k8s/ingress.yaml
+                        envsubst '\${NODE_IP}' < k8s/ingress.yaml.template | kubectl apply -f -
+                        
                         kubectl rollout status deployment/app -n devops-lab
                     """
                 }
