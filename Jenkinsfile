@@ -8,8 +8,8 @@ pipeline {
 
     environment {
         REGISTRY    = "ghcr.io"
-        IMAGE_NAME  = "gutamurr/devops-lab-app"
-        GHCR_EMAIL  = "gutamurr@gmail.com"
+        IMAGE_NAME  = "devops-lab-app"
+        GHCR_EMAIL  = "example@example.com"
     }
 
     stages {
